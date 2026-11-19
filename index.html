@@ -203,6 +203,7 @@ main.gm .ponly { display: none; }
       <button class="btn" id="slow" type="button">Hear it slowly</button>
       <button class="btn" id="recBtn" type="button">Record me</button>
       <button class="btn" id="play" type="button" hidden>Play my voice</button>
+      <button class="btn wide" id="check" type="button">Check my voice</button>
       <div class="rate" role="group" aria-label="How did it sound?">
         <span class="rate-title">How did it sound?</span>
         <button class="btn" type="button" data-r="2"><span aria-hidden="true">😊</span>Clear</button>
@@ -256,7 +257,7 @@ main.gm .ponly { display: none; }
     <p class="hint" id="bkMsg"></p>
   </section>
 
-  <p class="note">Words are spoken by your device voice. Recordings stay on this screen and are not saved or sent anywhere.</p>
+  <p class="note">Microphone note: your browser turns the microphone on only after you tap Record me or Check my voice, and you may see a microphone indicator while it is on. Words are spoken by your device voice. Recordings stay on this screen and are not saved or sent anywhere. Check my voice uses your phone's speech recognition, which may send audio to Apple. It is only a guide and can be wrong, so you can always tap a face to change the result.</p>
 </main>
 
 <script>
@@ -356,6 +357,7 @@ function stopAll() {
   timers.forEach(clearTimeout); timers = [];
   try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
   stopRecording();
+  stopListening();
   document.querySelectorAll(".syl.on").forEach(function (s) { s.classList.remove("on"); });
 }
 
@@ -680,6 +682,72 @@ $("bkApply").addEventListener("click", function () {
   $("bkText").hidden = true; $("bkApply").hidden = true; $("bkMsg").textContent = "Restored. Your stars and words are back.";
 });
 
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function normText(t) { return (t || "").toLowerCase().replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim(); }
+function lev(a, b) {
+  var m = a.length, n = b.length, d = [], i, j;
+  for (i = 0; i <= m; i++) { d[i] = [i]; }
+  for (j = 1; j <= n; j++) { d[0][j] = j; }
+  for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) {
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1));
+  }
+  return d[m][n];
+}
+function sim(a, b) { var m = Math.max(a.length, b.length); return m ? 1 - lev(a, b) / m : 1; }
+function scoreHeard(target, heard) {
+  var t = normText(target), h = normText(heard), tw = t.split(" "), hw = h.split(" ").filter(Boolean);
+  if (!h) return 0;
+  if (tw.length === 1) { var best = sim(t, h); hw.forEach(function (x) { best = Math.max(best, sim(t, x)); }); return best; }
+  var hit = 0;
+  tw.forEach(function (x) { if (hw.some(function (y) { return sim(x, y) >= 0.75; })) hit++; });
+  return hit / tw.length;
+}
+function judgeSpeech(target, alts) {
+  var best = -1, heard = alts[0] || "";
+  alts.forEach(function (a) { var sc = scoreHeard(target, a); if (sc > best) { best = sc; heard = a; } });
+  return { r: best >= 0.75 ? 2 : (best >= 0.4 ? 1 : 0), heard: heard };
+}
+var listening = null;
+function stopListening() { try { if (listening) listening.stop(); } catch (e) {} }
+function autoRate(w, r, heard) {
+  var arr = RATINGS[w.key] || [];
+  arr.push([r, Date.now(), 1]); RATINGS[w.key] = arr.slice(-20); saveRatings();
+  renderDots(); renderProgress();
+  var msg = heard ? "The phone heard “" + heard + "”. " : "";
+  msg += FB[r] + " The phone is not always right. Tap a face to change it.";
+  var recent = RATINGS[w.key].slice(-5).filter(function (x) { return x[0] === 2; }).length;
+  if (r === 2 && recent >= 3 && !state.stars[w.key]) msg += " This word is ready for a star.";
+  $("fb").textContent = msg;
+}
+if (!SR) { $("check").hidden = true; }
+$("check").addEventListener("click", function () {
+  var w = current(); if (!w || !SR) return;
+  if (listening) { stopListening(); return; }
+  stopAll();
+  var rec = new SR(); listening = rec;
+  rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 5; rec.continuous = false;
+  var got = false, wordAtStart = w;
+  rec.onresult = function (e) {
+    got = true;
+    var alts = []; var res = e.results && e.results[0];
+    if (res) for (var i = 0; i < res.length; i++) alts.push(res[i].transcript);
+    var j = judgeSpeech(wordAtStart.text, alts);
+    autoRate(wordAtStart, j.r, j.heard);
+  };
+  rec.onerror = function (e) {
+    got = true;
+    var c = e && e.error;
+    $("fb").textContent = c === "not-allowed" || c === "service-not-allowed" ? "Allow the microphone and speech recognition for Safari in Settings, then try again." : (c === "no-speech" ? "I did not hear anything. Tap Check my voice and try again." : "That did not work. Tap Check my voice and try again.");
+  };
+  rec.onend = function () {
+    listening = null; $("check").textContent = "Check my voice"; $("check").classList.remove("live");
+    if (!got) $("fb").textContent = "I did not hear anything. Tap Check my voice and try again.";
+  };
+  try {
+    rec.start(); $("check").textContent = "Listening. Say the word"; $("check").classList.add("live"); $("fb").textContent = "";
+  } catch (err) { listening = null; $("fb").textContent = "That did not work. Tap Check my voice and try again."; }
+});
+
 var GAME_SOUNDS = ["All", "SH", "ST", "R"];
 var G = { sound: "All", cur: null, timers: [] };
 function gAfter(fn, ms) { G.timers.push(setTimeout(fn, ms)); }
@@ -838,6 +906,7 @@ document.querySelectorAll(".rate .btn").forEach(function (b) {
     var w = current(); if (!w) return;
     var r = Number(b.getAttribute("data-r"));
     var arr = RATINGS[w.key] || [];
+    var last = arr[arr.length - 1]; if (last && last[2] === 1 && Date.now() - last[1] < 120000) arr.pop();
     arr.push([r, Date.now()]); RATINGS[w.key] = arr.slice(-20); saveRatings();
     renderDots(); renderProgress();
     var msg = FB[r];
