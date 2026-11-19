@@ -86,6 +86,30 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
 .tile[aria-current="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
 .tile .st { position: absolute; top: 4px; right: 8px; font-size: 0.8rem; color: var(--sun); }
 .pic { font-size: 5.5rem; line-height: 1; }
+.actions .hint { grid-column: 1 / -1; }
+.rate { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rate-title { grid-column: 1 / -1; font-weight: 700; text-align: center; }
+.rate .btn { min-height: 64px; font-size: 1rem; flex-direction: column; gap: 2px; padding: 8px 6px; }
+.dots { display: flex; gap: 6px; justify-content: center; min-height: 28px; }
+.dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 700; border: 2px solid var(--muted); color: var(--muted); }
+.dot.c { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+.dot.a { background: var(--sun); border-color: var(--sun); color: #12353a; }
+.progress { display: flex; flex-direction: column; gap: 6px; border-top: 2px solid var(--line); padding-top: 18px; }
+.progress h3 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
+.progress p { margin: 0; }
+.pic img { max-height: 150px; max-width: 70%; border-radius: 18px; display: block; }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.addword { display: flex; flex-direction: column; gap: 10px; border-top: 2px solid var(--line); padding-top: 18px; }
+.addword h3 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
+.addword label.lbl { font-weight: 700; }
+.addword input[type="text"] { width: 100%; font: inherit; font-size: 1.1rem; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+.addword .row { display: flex; gap: 10px; align-items: stretch; }
+.addword .row input[type="text"] { flex: 1; min-width: 0; }
+.btn.small { min-height: 52px; font-size: 1rem; padding: 8px 16px; }
+.nwprev img { max-height: 100px; border-radius: 12px; display: block; }
+.myrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; border: 2px solid var(--line); border-radius: 14px; background: var(--card); }
+.myrow .btn { min-height: 44px; font-size: 0.95rem; padding: 6px 14px; }
+#myList { display: flex; flex-direction: column; gap: 8px; }
 .word.phrase { font-size: clamp(2rem, 10vw, 3.4rem); gap: 0.28em; line-height: 1.15; }
 .backup { display: flex; flex-direction: column; gap: 10px; border-top: 2px solid var(--line); padding-top: 18px; }
 .backup h3 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
@@ -118,12 +142,20 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
     <div class="pic" id="pic" aria-hidden="true"></div>
     <h2 class="word" id="word" aria-live="polite"></h2>
     <p class="hint" id="hint">Tap Hear it, then try saying it yourself.</p>
+    <div class="dots" id="dots" aria-label="Recent tries"></div>
     <p class="tip" id="tip"></p>
     <div class="actions">
       <button class="btn fill" id="hear" type="button">Hear it</button>
       <button class="btn" id="slow" type="button">Hear it slowly</button>
       <button class="btn" id="recBtn" type="button">Record me</button>
       <button class="btn" id="play" type="button" hidden>Play my voice</button>
+      <div class="rate" role="group" aria-label="How did it sound?">
+        <span class="rate-title">How did it sound?</span>
+        <button class="btn" type="button" data-r="2"><span aria-hidden="true">😊</span>Clear</button>
+        <button class="btn" type="button" data-r="1"><span aria-hidden="true">🙂</span>Almost</button>
+        <button class="btn" type="button" data-r="0"><span aria-hidden="true">💪</span>Try again</button>
+      </div>
+      <p class="hint" id="fb" aria-live="polite"></p>
       <button class="btn wide" id="rep" type="button">Said it: 0 of 3</button>
       <button class="btn star wide" id="star" type="button" aria-pressed="false">Mark as got it</button>
     </div>
@@ -134,9 +166,33 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
   </section>
 
   <div class="grid" id="grid"></div>
+  <section class="progress" aria-label="Practice progress">
+    <h3>Practice progress</h3>
+    <p id="progToday"></p>
+    <p id="progAll" class="note"></p>
+  </section>
+
+  <section class="addword" aria-label="Add your own word">
+    <h3>Add your own word</h3>
+    <label class="lbl" for="nwText">Word or phrase</label>
+    <input id="nwText" type="text" maxlength="40" autocomplete="off" autocapitalize="none" placeholder="For example: Frankie">
+    <label class="lbl" for="nwParts">Parts (optional)</label>
+    <input id="nwParts" type="text" maxlength="60" autocomplete="off" autocapitalize="none" placeholder="Split with spaces, like: ba na na">
+    <label class="lbl" for="nwPic">Picture (optional)</label>
+    <div class="row">
+      <input id="nwPic" type="text" maxlength="4" autocomplete="off" placeholder="Type an emoji">
+      <label class="btn small" for="nwPhoto">Add photo</label>
+      <input class="vh" id="nwPhoto" type="file" accept="image/*">
+    </div>
+    <div class="nwprev" id="nwPreview"></div>
+    <button class="btn fill wide" id="nwSave" type="button">Save word</button>
+    <p class="hint" id="nwMsg"></p>
+    <div id="myList"></div>
+  </section>
+
   <section class="backup" aria-label="Back up your stars">
-    <h3>Back up your stars</h3>
-    <p class="note">Your stars are saved on this phone. To keep them safe, copy the backup code and save it in Notes, or text it to yourself. Paste it back here to restore.</p>
+    <h3>Back up your stars and words</h3>
+    <p class="note">Your stars are saved on this phone. Photos are not included. To keep everything else safe, copy the backup code and save it in Notes, or text it to yourself. Paste it back here to restore.</p>
     <div class="actions">
       <button class="btn" id="bkShow" type="button">Show backup code</button>
       <button class="btn" id="bkRestore" type="button">Restore from code</button>
@@ -150,7 +206,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
 </main>
 
 <script>
-var WORDS = [
+var BASE = [
   ["SH","shoe","shoe","👟"],["SH","ship","ship","🚢"],["SH","sheep","sheep","🐑"],["SH","shell","shell","🐚"],
   ["SH","shark","shark","🦈"],["SH","shirt","shirt","👕"],["SH","shorts","shorts","🩳"],["SH","shower","show·er","🚿"],
   ["SH","shampoo","sham·poo","🧴"],["SH","fish","fish","🐟"],["SH","dish","dish","🍽️"],["SH","brush","brush","🖌️"],
@@ -165,18 +221,56 @@ var WORDS = [
   ["Phrase","Stop sign","Stop·sign","🛑"],["Phrase","Star in the sky","Star·in·the·sky","⭐"],["Phrase","Rocket ride","Rock·et·ride","🚀"],
   ["Phrase","Wash the sheep","Wash·the·sheep","🐑"],["Phrase","Funny monster","Fun·ny·mon·ster","👹"],["Phrase","Run to the river","Run·to·the·riv·er","🏞️"],
   ["Phrase","Shell on the shore","Shell·on·the·shore","🐚"],["Phrase","Rain on the roof","Rain·on·the·roof","🌧️"],["Phrase","Strawberry toast","Straw·ber·ry·toast","🍓"]
-].map(function (w) { return { id: w[1], key: w[1], cat: w[0], text: w[1], syl: w[2].split("·"), pic: w[3] }; });
+].map(function (w) { return { id: w[1], key: w[1], cat: w[0], text: w[1], syl: w[2].split("\u00b7"), pic: w[3], img: "" }; });
 
-var GROUPS = ["All", "SH", "ST", "R", "Phrase", "Starred"];
+var CUSTOM = [];
+try { CUSTOM = JSON.parse(localStorage.getItem("fw-custom") || "[]") || []; } catch (e) { CUSTOM = []; }
+function saveCustom() { try { localStorage.setItem("fw-custom", JSON.stringify(CUSTOM)); return true; } catch (e) { return false; } }
+var WORDS = [];
+function rebuildWords() {
+  WORDS = BASE.concat(CUSTOM.map(function (c) {
+    return { id: "my:" + c.text, key: "my:" + c.text, cat: "Mine", text: c.text, syl: c.syl, pic: c.pic || "", img: c.img || "" };
+  }));
+}
+
+var GROUPS = ["All", "SH", "ST", "R", "Phrase", "Mine", "Starred"];
 var TIPS = {
   SH: "Round your lips a little and pull your tongue back. Push out a long, quiet shhh before the rest of the word.",
   ST: "Tongue tip up behind your top teeth. Make a hissing sss, then tap the tongue down for t. Sss, then t.",
   R: "Pull your tongue back and keep its sides up, lips slightly round. Start with a long rrr, like a friendly growl.",
+  Mine: "Take your time. Say it slowly, then say it again.",
   Phrase: "Say it slowly, one word at a time. Take an easy breath between words. Slow and clear is the goal."
 };
 var state = { group: "All", idx: 0, stars: {}, recs: {}, reps: {} };
 try { state.stars = JSON.parse(localStorage.getItem("fw-stars") || "{}") || {}; } catch (e) { state.stars = {}; }
 function saveStars() { try { localStorage.setItem("fw-stars", JSON.stringify(state.stars)); } catch (e) {} }
+
+var RATINGS = {};
+try { RATINGS = JSON.parse(localStorage.getItem("fw-ratings") || "{}") || {}; } catch (e) { RATINGS = {}; }
+function saveRatings() { try { localStorage.setItem("fw-ratings", JSON.stringify(RATINGS)); } catch (e) {} }
+var FB = { 2: "Wonderful. That sounded clear.", 1: "Nice try. Listen once more, then try again.", 0: "That is okay. Go slow and easy, then try again." };
+var RNAME = { 2: "Clear", 1: "Almost", 0: "Try again" };
+var RMARK = { 2: "\u2713", 1: "~", 0: "\u25CB" };
+var RCLASS = { 2: "c", 1: "a", 0: "t" };
+function renderDots() {
+  var box = $("dots"); box.innerHTML = "";
+  var w = current(); if (!w) return;
+  (RATINGS[w.key] || []).slice(-5).forEach(function (x) {
+    var d = document.createElement("span"); d.className = "dot " + RCLASS[x[0]]; d.textContent = RMARK[x[0]];
+    d.setAttribute("role", "img"); d.setAttribute("aria-label", RNAME[x[0]]); box.appendChild(d);
+  });
+}
+function renderProgress() {
+  var today = new Date().toDateString(), tt = 0, tc = 0, at = 0, ac = 0;
+  Object.keys(RATINGS).forEach(function (k) {
+    RATINGS[k].forEach(function (x) {
+      at++; if (x[0] === 2) ac++;
+      if (new Date(x[1]).toDateString() === today) { tt++; if (x[0] === 2) tc++; }
+    });
+  });
+  $("progToday").textContent = tt ? "Today: " + tt + (tt === 1 ? " try" : " tries") + ", " + tc + " clear." : "Today: no tries yet. Pick a word to start.";
+  $("progAll").textContent = at ? "All time: " + at + " tries, " + ac + " clear. Every try is practice." : "";
+}
 
 var $ = function (id) { return document.getElementById(id); };
 var timers = [];
@@ -237,11 +331,17 @@ function renderChips() {
   var box = $("chips"); box.innerHTML = "";
   GROUPS.forEach(function (g) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = g === "Phrase" ? "Phrases" : g;
+    b.type = "button"; b.className = "chip"; b.textContent = g === "Phrase" ? "Phrases" : (g === "Mine" ? "My words" : g);
     b.setAttribute("aria-pressed", String(g === state.group));
     b.addEventListener("click", function () { stopAll(); state.group = g; state.idx = 0; render(); });
     box.appendChild(b);
   });
+}
+
+function setPic(w) {
+  var p = $("pic"); p.innerHTML = "";
+  if (w && w.img) { var im = document.createElement("img"); im.src = w.img; im.alt = ""; p.appendChild(im); }
+  else { p.textContent = (w && w.pic) || ""; }
 }
 
 function renderStage() {
@@ -249,10 +349,11 @@ function renderStage() {
   var wordEl = $("word"); wordEl.innerHTML = "";
   if (!w) {
     $("cat").textContent = "";
-    $("pic").textContent = "";
-    wordEl.textContent = "No stars yet";
+    setPic(null);
+    $("dots").innerHTML = ""; $("fb").textContent = "";
+    wordEl.textContent = state.group === "Mine" ? "No words yet" : "No stars yet";
     wordEl.style.fontSize = "2rem";
-    $("hint").textContent = "Mark words as got it and they show up here.";
+    $("hint").textContent = state.group === "Mine" ? "Add your own word below." : "Mark words as got it and they show up here.";
     $("tip").textContent = "";
     ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = true; });
     $("play").hidden = true;
@@ -260,15 +361,17 @@ function renderStage() {
   }
   wordEl.style.fontSize = "";
   ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = false; });
-  $("cat").textContent = w.cat === "Phrase" ? "Phrase practice" : w.cat + " sound";
-  $("pic").textContent = w.pic || "";
-  wordEl.className = "word" + (w.cat === "Phrase" ? " phrase" : "");
+  $("cat").textContent = w.cat === "Phrase" ? "Phrase practice" : (w.cat === "Mine" ? "My word" : w.cat + " sound");
+  setPic(w);
+  wordEl.className = "word" + ((w.cat === "Phrase" || w.text.length > 9) ? " phrase" : "");
   $("tip").textContent = TIPS[w.cat] || "";
   updateRep();
+  renderDots();
+  $("fb").textContent = "";
   w.syl.forEach(function (s) {
     var span = document.createElement("span"); span.className = "syl"; span.textContent = s; wordEl.appendChild(span);
   });
-  $("hint").textContent = w.syl.length > 1 ? w.syl.length + (w.cat === "Phrase" ? " words" : " parts") + ". Tap Hear it slowly to see each one light up." : "One short sound. Take a breath, then say it.";
+  $("hint").textContent = w.syl.length > 1 ? w.syl.length + (/\s/.test(w.text) ? " words" : " parts") + ". Tap Hear it slowly to see each one light up." : "One short sound. Take a breath, then say it.";
   $("play").hidden = !state.recs[w.id];
   var on = !!state.stars[w.key];
   $("star").setAttribute("aria-pressed", String(on));
@@ -286,7 +389,7 @@ function renderGrid() {
   var cur = current();
   list().forEach(function (w, i) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "tile"; b.textContent = (w.pic ? w.pic + " " : "") + w.text;
+    b.type = "button"; b.className = "tile"; b.textContent = (w.img ? "📷 " : (w.pic ? w.pic + " " : "")) + w.text;
     if (cur && cur.id === w.id) b.setAttribute("aria-current", "true");
     if (state.stars[w.key]) { var s = document.createElement("span"); s.className = "st"; s.textContent = "★"; b.appendChild(s); }
     b.addEventListener("click", function () { stopAll(); state.idx = i; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
@@ -300,7 +403,7 @@ function renderMeter() {
   $("meterText").textContent = n + " of " + WORDS.length;
 }
 
-function render() { renderChips(); renderStage(); renderGrid(); renderMeter(); }
+function render() { renderChips(); renderStage(); renderGrid(); renderMeter(); renderProgress(); }
 
 $("hear").addEventListener("click", function () {
   var w = current(); if (!w) return; stopAll();
@@ -400,13 +503,82 @@ $("voice").addEventListener("change", function (e) {
 try { window.speechSynthesis.onvoiceschanged = fillVoices; } catch (e) {}
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
 
+var pendingImg = "";
+
+function resizeImage(file, cb) {
+  var r = new FileReader();
+  r.onload = function () {
+    var im = new Image();
+    im.onload = function () {
+      var max = 360, k = Math.min(1, max / Math.max(im.width, im.height));
+      var c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+      cb(c.toDataURL("image/jpeg", 0.8));
+    };
+    im.onerror = function () { cb(""); };
+    im.src = r.result;
+  };
+  r.onerror = function () { cb(""); };
+  r.readAsDataURL(file);
+}
+function splitParts(parts, text) {
+  var p = (parts || "").trim().split(/[\s·.]+/).filter(Boolean);
+  if (!p.length) p = text.indexOf(" ") > -1 ? text.split(/\s+/) : [text];
+  return p;
+}
+function renderMyList() {
+  var box = $("myList"); box.innerHTML = "";
+  CUSTOM.forEach(function (c, i) {
+    var row = document.createElement("div"); row.className = "myrow";
+    var label = document.createElement("span"); label.textContent = (c.img ? "📷 " : (c.pic ? c.pic + " " : "")) + c.text;
+    var del = document.createElement("button"); del.type = "button"; del.className = "btn"; del.textContent = "Delete";
+    del.addEventListener("click", function () {
+      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Tap again to delete"; return; }
+      var key = "my:" + c.text; delete state.stars[key]; saveStars();
+      CUSTOM.splice(i, 1); saveCustom(); rebuildWords(); state.idx = 0; render(); renderMyList();
+    });
+    row.appendChild(label); row.appendChild(del); box.appendChild(row);
+  });
+}
+$("nwPhoto").addEventListener("change", function (e) {
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  resizeImage(f, function (data) {
+    pendingImg = data; e.target.value = "";
+    var pv = $("nwPreview"); pv.innerHTML = "";
+    if (data) { var im = document.createElement("img"); im.src = data; im.alt = "Chosen photo"; pv.appendChild(im); $("nwMsg").textContent = "Photo added."; }
+    else { $("nwMsg").textContent = "That photo could not be used. Try another one."; }
+  });
+});
+$("nwSave").addEventListener("click", function () {
+  var text = $("nwText").value.trim().replace(/\s+/g, " ");
+  if (!text) { $("nwMsg").textContent = "Type a word or phrase first."; return; }
+  var entry = { text: text, syl: splitParts($("nwParts").value, text), pic: pendingImg ? "" : $("nwPic").value.trim(), img: pendingImg };
+  var at = -1; CUSTOM.forEach(function (c, i) { if (c.text === text) at = i; });
+  if (at > -1) CUSTOM[at] = entry; else CUSTOM.push(entry);
+  if (!saveCustom()) { $("nwMsg").textContent = "Could not save on this phone. Try a smaller photo or free up space."; return; }
+  rebuildWords();
+  $("nwText").value = ""; $("nwParts").value = ""; $("nwPic").value = ""; $("nwPreview").innerHTML = ""; pendingImg = "";
+  stopAll(); state.group = "Mine";
+  var l = list(); state.idx = Math.max(0, l.map(function (w) { return w.text; }).indexOf(text));
+  render(); renderMyList();
+  $("nwMsg").textContent = "Saved. It is now in My words.";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function unb64(str) { return decodeURIComponent(escape(atob(str))); }
 function backupCode() {
-  return "FW1:" + btoa(unescape(encodeURIComponent(JSON.stringify(Object.keys(state.stars)))));
+  var rr = {}; Object.keys(RATINGS).forEach(function (k) { rr[k] = RATINGS[k].slice(-5); });
+  var data = { r: rr, s: Object.keys(state.stars), c: CUSTOM.map(function (c) { return { text: c.text, syl: c.syl, pic: c.pic || "" }; }) };
+  return "FW2:" + b64(JSON.stringify(data));
 }
 function parseBackup(t) {
   t = (t || "").trim();
-  if (t.indexOf("FW1:") !== 0) return null;
-  try { var a = JSON.parse(decodeURIComponent(escape(atob(t.slice(4))))); return Array.isArray(a) ? a : null; } catch (e) { return null; }
+  try {
+    if (t.indexOf("FW2:") === 0) { var d = JSON.parse(unb64(t.slice(4))); return d && Array.isArray(d.s) ? d : null; }
+    if (t.indexOf("FW1:") === 0) { var a = JSON.parse(unb64(t.slice(4))); return Array.isArray(a) ? { s: a, c: [] } : null; }
+  } catch (e) {}
+  return null;
 }
 $("bkShow").addEventListener("click", function () {
   var ta = $("bkText"); ta.hidden = false; $("bkApply").hidden = true;
@@ -419,13 +591,38 @@ $("bkRestore").addEventListener("click", function () {
   $("bkApply").hidden = false; $("bkMsg").textContent = "Paste your backup code, then tap Restore now.";
 });
 $("bkApply").addEventListener("click", function () {
-  var arr = parseBackup($("bkText").value);
-  if (!arr) { $("bkMsg").textContent = "That code did not work. Copy the whole code and try again."; return; }
+  var d = parseBackup($("bkText").value);
+  if (!d) { $("bkMsg").textContent = "That code did not work. Copy the whole code and try again."; return; }
+  (d.c || []).forEach(function (c) {
+    if (!c || !c.text) return;
+    var have = CUSTOM.some(function (x) { return x.text === c.text; });
+    if (!have) CUSTOM.push({ text: String(c.text), syl: Array.isArray(c.syl) && c.syl.length ? c.syl.map(String) : [String(c.text)], pic: String(c.pic || ""), img: "" });
+  });
+  saveCustom(); rebuildWords();
   var valid = {}; WORDS.forEach(function (w) { valid[w.key] = 1; });
-  arr.forEach(function (k) { if (valid[k]) state.stars[k] = 1; });
-  saveStars(); render();
-  $("bkText").hidden = true; $("bkApply").hidden = true; $("bkMsg").textContent = "Restored. Your stars are back.";
+  d.s.forEach(function (k) { if (valid[k]) state.stars[k] = 1; });
+  if (d.r) Object.keys(d.r).forEach(function (k) { if (valid[k] && !RATINGS[k] && Array.isArray(d.r[k])) RATINGS[k] = d.r[k]; });
+  saveRatings();
+  saveStars(); render(); renderMyList();
+  $("bkText").hidden = true; $("bkApply").hidden = true; $("bkMsg").textContent = "Restored. Your stars and words are back.";
 });
+
+document.querySelectorAll(".rate .btn").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var w = current(); if (!w) return;
+    var r = Number(b.getAttribute("data-r"));
+    var arr = RATINGS[w.key] || [];
+    arr.push([r, Date.now()]); RATINGS[w.key] = arr.slice(-20); saveRatings();
+    renderDots(); renderProgress();
+    var msg = FB[r];
+    var recent = RATINGS[w.key].slice(-5).filter(function (x) { return x[0] === 2; }).length;
+    if (r === 2 && recent >= 3 && !state.stars[w.key]) msg += " This word is ready for a star.";
+    $("fb").textContent = msg;
+  });
+});
+
+rebuildWords();
+renderMyList();
 
 fillVoices();
 render();
