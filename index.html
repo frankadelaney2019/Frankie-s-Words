@@ -86,6 +86,32 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
 .tile[aria-current="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
 .tile .st { position: absolute; top: 4px; right: 8px; font-size: 0.8rem; color: var(--sun); }
 .pic { font-size: 5.5rem; line-height: 1; }
+.word.sentence { font-size: clamp(1.6rem, 7vw, 2.4rem); gap: 0.25em; line-height: 1.25; }
+.modes { display: flex; gap: 8px; }
+.modes .chip { font-size: 1.05rem; padding: 10px 20px; }
+main.gm .ponly { display: none; }
+.games { display: flex; flex-direction: column; gap: 14px; }
+.games[hidden], #gmMenu[hidden], #gmPlay[hidden], #gmHear[hidden] { display: none; }
+#gmMenu, #gmPlay { display: flex; flex-direction: column; gap: 14px; }
+.gtitle { font-family: var(--display); font-size: 1.5rem; margin: 0; }
+.gcards { display: flex; flex-direction: column; gap: 12px; }
+.gcard { font: inherit; text-align: left; display: grid; gap: 2px; padding: 16px 18px; border-radius: 20px; border: 2px solid var(--primary); background: var(--card); color: var(--ink); cursor: pointer; min-height: 88px; }
+.gcard b { font-family: var(--display); font-size: 1.3rem; }
+.gcard span { color: var(--muted); font-size: 0.95rem; }
+.gcard:focus-visible, .gtile:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.gbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+#gmScore { font-weight: 700; font-variant-numeric: tabular-nums; }
+.gprompt { font-family: var(--display); font-weight: 600; font-size: 1.4rem; margin: 0; text-align: center; }
+.gboard { display: grid; gap: 10px; }
+.gboard.two { grid-template-columns: 1fr 1fr; }
+.gboard.three { grid-template-columns: repeat(3, 1fr); }
+.gtile { font: inherit; font-size: 4rem; line-height: 1; min-height: 130px; border-radius: 22px; border: 3px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.gboard.three .gtile { font-size: 2.6rem; min-height: 92px; }
+.gtile.up { border-color: var(--primary); }
+.gtile.correct, .gtile.done { border-color: var(--primary); background: var(--bg); }
+.gtile.wrong { border-color: var(--sun); opacity: .55; }
+.gfinish { text-align: center; padding: 20px; border: 2px solid var(--line); border-radius: 22px; background: var(--card); display: flex; flex-direction: column; gap: 14px; align-items: center; font-family: var(--display); font-size: 1.5rem; }
+.gfinish p { margin: 0; }
 .actions .hint { grid-column: 1 / -1; }
 .rate { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .rate-title { grid-column: 1 / -1; font-weight: 700; text-align: center; }
@@ -126,6 +152,11 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
     <span class="tag">Say it. Hear it. Star it.</span>
   </header>
 
+  <div class="modes" role="group" aria-label="Mode">
+    <button class="chip" id="modePractice" type="button" aria-pressed="true">Practice</button>
+    <button class="chip" id="modeGames" type="button" aria-pressed="false">Games</button>
+  </div>
+
   <div class="meter" aria-live="polite">
     <div class="meter-bar"><div class="meter-fill" id="fill"></div></div>
     <span class="meter-text" id="meterText">0 of 0</span>
@@ -136,6 +167,29 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
   <label class="voice-row" id="voiceRow" hidden>Voice
     <select id="voice"></select>
   </label>
+
+  <section class="games" id="games" aria-label="Games" hidden>
+    <div id="gmMenu">
+      <h2 class="gtitle">Pick a game</h2>
+      <div class="chips" id="gmSounds" role="group" aria-label="Sound to practice"></div>
+      <div class="gcards">
+        <button class="gcard" type="button" data-g="match"><b>🖼️ Picture Match</b><span>Hear a word. Tap the right picture. Then say it.</span></button>
+        <button class="gcard" type="button" data-g="memory"><b>🧠 Memory Match</b><span>Flip cards and find the pairs. Say each word you match.</span></button>
+        <button class="gcard" type="button" data-g="hunt"><b>🔎 Sound Hunt</b><span>Find the picture whose word starts with the sound.</span></button>
+      </div>
+      <p class="note">There is no losing. A wrong tap just means try another one.</p>
+    </div>
+    <div id="gmPlay" hidden>
+      <div class="gbar">
+        <button class="btn small" id="gmBack" type="button">Back to games</button>
+        <span id="gmScore" aria-live="polite"></span>
+      </div>
+      <p class="gprompt" id="gmPrompt"></p>
+      <button class="btn small" id="gmHear" type="button">Hear it again</button>
+      <div class="gboard" id="gmBoard"></div>
+      <p class="hint" id="gmMsg" aria-live="polite"></p>
+    </div>
+  </section>
 
   <section class="stage" aria-label="Practice word">
     <span class="cat" id="cat"></span>
@@ -220,8 +274,18 @@ var BASE = [
   ["Phrase","Red rabbit","Red·rabbit","🐰"],["Phrase","Shiny shoes","Shi·ny·shoes","👟"],["Phrase","Fish in a dish","Fish·in·a·dish","🐟"],
   ["Phrase","Stop sign","Stop·sign","🛑"],["Phrase","Star in the sky","Star·in·the·sky","⭐"],["Phrase","Rocket ride","Rock·et·ride","🚀"],
   ["Phrase","Wash the sheep","Wash·the·sheep","🐑"],["Phrase","Funny monster","Fun·ny·mon·ster","👹"],["Phrase","Run to the river","Run·to·the·riv·er","🏞️"],
-  ["Phrase","Shell on the shore","Shell·on·the·shore","🐚"],["Phrase","Rain on the roof","Rain·on·the·roof","🌧️"],["Phrase","Strawberry toast","Straw·ber·ry·toast","🍓"]
-].map(function (w) { return { id: w[1], key: w[1], cat: w[0], text: w[1], syl: w[2].split("\u00b7"), pic: w[3], img: "" }; });
+  ["Phrase","Shell on the shore","Shell·on·the·shore","🐚"],["Phrase","Rain on the roof","Rain·on·the·roof","🌧️"],["Phrase","Strawberry toast","Straw·ber·ry·toast","🍓"],
+  ["Sentence","The sheep has a shoe.","","🐑"],["Sentence","I wash my shirt.","","👕"],["Sentence","A fish is in the dish.","","🐟"],["Sentence","She shines the shell.","","🐚"],
+  ["Sentence","Stop at the stop sign.","","🛑"],["Sentence","The star is in the sky.","","⭐"],["Sentence","I stand on the stairs.","","🪜"],["Sentence","The monster is on the stage.","","👹"],
+  ["Sentence","The red rabbit runs.","","🐰"],["Sentence","The robot rides a rocket.","","🤖"],["Sentence","Rain falls on the river.","","🌧️"],["Sentence","A parrot eats a carrot.","","🦜"],
+  ["Story","Rob the robot has a red rocket.","","🚀","The Red Rocket",1],["Story","He rides the rocket over the river.","","🚀","The Red Rocket",2],
+  ["Story","Rain falls, but Rob keeps riding.","","🌧️","The Red Rocket",3],["Story","Rob parks the rocket by a rose.","","🌹","The Red Rocket",4],
+  ["Story","Stella found a star in the street.","","⭐","Stella's Star",1],["Story","She put the star in a stone nest.","","🪹","Stella's Star",2],
+  ["Story","The star stayed bright all night.","","🌙","Stella's Star",3],["Story","Stella told a story to the star.","","📖","Stella's Star",4],
+  ["Story","Shelly has a shiny ship.","","🚢","Shelly's Ship",1],["Story","She puts a shell on the ship.","","🐚","Shelly's Ship",2],
+  ["Story","A sheep and a fish ride the ship.","","🐑","Shelly's Ship",3],["Story","Shelly shares a dish on the shore.","","🍽️","Shelly's Ship",4]
+].map(function (w) { return { id: w[1], key: w[1], cat: w[0], text: w[1], syl: (w[2] ? w[2].split("\u00b7") : w[1].split(" ")), pic: w[3], img: "", sub: w[4] || "", n: w[5] || 0 }; });
+BASE.forEach(function (w) { if (w.cat === "Story") w.of = BASE.filter(function (x) { return x.sub === w.sub; }).length; });
 
 var CUSTOM = [];
 try { CUSTOM = JSON.parse(localStorage.getItem("fw-custom") || "[]") || []; } catch (e) { CUSTOM = []; }
@@ -233,11 +297,13 @@ function rebuildWords() {
   }));
 }
 
-var GROUPS = ["All", "SH", "ST", "R", "Phrase", "Mine", "Starred"];
+var GROUPS = ["All", "SH", "ST", "R", "Phrase", "Sentence", "Story", "Mine", "Starred"];
 var TIPS = {
   SH: "Round your lips a little and pull your tongue back. Push out a long, quiet shhh before the rest of the word.",
   ST: "Tongue tip up behind your top teeth. Make a hissing sss, then tap the tongue down for t. Sss, then t.",
   R: "Pull your tongue back and keep its sides up, lips slightly round. Start with a long rrr, like a friendly growl.",
+  Sentence: "Say it slowly, one word at a time. Breathe between words. When it feels easy, try it a little faster.",
+  Story: "Read one line at a time. Listen first, say it slowly, then rate it. Take as long as you need.",
   Mine: "Take your time. Say it slowly, then say it again.",
   Phrase: "Say it slowly, one word at a time. Take an easy breath between words. Slow and clear is the goal."
 };
@@ -269,7 +335,8 @@ function renderProgress() {
     });
   });
   $("progToday").textContent = tt ? "Today: " + tt + (tt === 1 ? " try" : " tries") + ", " + tc + " clear." : "Today: no tries yet. Pick a word to start.";
-  $("progAll").textContent = at ? "All time: " + at + " tries, " + ac + " clear. Every try is practice." : "";
+  var gf = 0; try { gf = Number(localStorage.getItem("fw-games")) || 0; } catch (e) {}
+  $("progAll").textContent = (at ? "All time: " + at + " tries, " + ac + " clear. Every try is practice." : "") + (gf ? " Games finished: " + gf + "." : "");
 }
 
 var $ = function (id) { return document.getElementById(id); };
@@ -331,7 +398,7 @@ function renderChips() {
   var box = $("chips"); box.innerHTML = "";
   GROUPS.forEach(function (g) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = g === "Phrase" ? "Phrases" : (g === "Mine" ? "My words" : g);
+    b.type = "button"; b.className = "chip"; b.textContent = g === "Phrase" ? "Phrases" : (g === "Sentence" ? "Sentences" : (g === "Story" ? "Stories" : (g === "Mine" ? "My words" : g)));
     b.setAttribute("aria-pressed", String(g === state.group));
     b.addEventListener("click", function () { stopAll(); state.group = g; state.idx = 0; render(); });
     box.appendChild(b);
@@ -361,9 +428,9 @@ function renderStage() {
   }
   wordEl.style.fontSize = "";
   ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = false; });
-  $("cat").textContent = w.cat === "Phrase" ? "Phrase practice" : (w.cat === "Mine" ? "My word" : w.cat + " sound");
+  $("cat").textContent = w.cat === "Phrase" ? "Phrase practice" : (w.cat === "Sentence" ? "Sentence practice" : (w.cat === "Story" ? "Story: " + w.sub + " (" + w.n + " of " + w.of + ")" : (w.cat === "Mine" ? "My word" : w.cat + " sound")));
   setPic(w);
-  wordEl.className = "word" + ((w.cat === "Phrase" || w.text.length > 9) ? " phrase" : "");
+  wordEl.className = "word" + ((w.cat === "Phrase" || w.text.length > 9) ? " phrase" : "") + ((w.cat === "Sentence" || w.cat === "Story") ? " sentence" : "");
   $("tip").textContent = TIPS[w.cat] || "";
   updateRep();
   renderDots();
@@ -418,9 +485,9 @@ $("slow").addEventListener("click", function () {
     timers.push(setTimeout(function () {
       spans.forEach(function (x) { x.classList.remove("on"); });
       s.classList.add("on");
-    }, i * 650));
+    }, i * ((current() && (current().cat === "Sentence" || current().cat === "Story")) ? 900 : 650)));
   });
-  timers.push(setTimeout(function () { spans.forEach(function (x) { x.classList.remove("on"); }); }, spans.length * 650 + 300));
+  timers.push(setTimeout(function () { spans.forEach(function (x) { x.classList.remove("on"); }); }, spans.length * ((current() && (current().cat === "Sentence" || current().cat === "Story")) ? 900 : 650) + 300));
 });
 
 $("recBtn").addEventListener("click", function () {
@@ -606,6 +673,159 @@ $("bkApply").addEventListener("click", function () {
   saveStars(); render(); renderMyList();
   $("bkText").hidden = true; $("bkApply").hidden = true; $("bkMsg").textContent = "Restored. Your stars and words are back.";
 });
+
+var GAME_SOUNDS = ["All", "SH", "ST", "R"];
+var G = { sound: "All", cur: null, timers: [] };
+function gAfter(fn, ms) { G.timers.push(setTimeout(fn, ms)); }
+function gClear() { G.timers.forEach(clearTimeout); G.timers = []; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} }
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function gAll() { return WORDS.filter(function (w) { return (w.cat === "SH" || w.cat === "ST" || w.cat === "R") && w.pic; }); }
+function gPool() { var p = gAll(); return G.sound === "All" ? p : p.filter(function (w) { return w.cat === G.sound; }); }
+function gTile(emoji, label) {
+  var b = document.createElement("button"); b.type = "button"; b.className = "gtile"; b.textContent = emoji; b.setAttribute("aria-label", label); return b;
+}
+function setScore(t) { $("gmScore").textContent = t; }
+function renderGameSounds() {
+  var box = $("gmSounds"); box.innerHTML = "";
+  GAME_SOUNDS.forEach(function (g) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = g === "All" ? "All sounds" : g;
+    b.setAttribute("aria-pressed", String(g === G.sound));
+    b.addEventListener("click", function () { G.sound = g; renderGameSounds(); });
+    box.appendChild(b);
+  });
+}
+function showGameMenu() { gClear(); G.cur = null; $("gmPlay").hidden = true; $("gmMenu").hidden = false; }
+function startGame(name) {
+  gClear(); G.cur = { name: name, round: 0, total: 5, stars: 0, missed: false, locked: false };
+  $("gmMenu").hidden = true; $("gmPlay").hidden = false; $("gmMsg").textContent = "";
+  if (name === "match") nextMatch(); else if (name === "hunt") nextHunt(); else startMemory();
+}
+function roundScore(st) { setScore("Round " + Math.min(st.round + 1, st.total) + " of " + st.total + "   Stars: " + st.stars); }
+
+function nextMatch() {
+  var st = G.cur; if (!st) return;
+  if (!st.order) { st.order = shuffle(gPool()).slice(0, st.total); st.total = st.order.length; }
+  if (st.round >= st.total) return finishGame();
+  var t = st.order[st.round]; st.target = t; st.missed = false; st.locked = false;
+  var opts = shuffle([t].concat(shuffle(gAll().filter(function (w) { return w.key !== t.key; })).slice(0, 3)));
+  $("gmPrompt").textContent = "Listen, then tap the picture."; $("gmHear").hidden = false; $("gmMsg").textContent = "";
+  roundScore(st);
+  var board = $("gmBoard"); board.innerHTML = ""; board.className = "gboard two";
+  opts.forEach(function (w, i) {
+    var b = gTile(w.pic, "Picture " + (i + 1));
+    b.addEventListener("click", function () {
+      if (st.locked) return;
+      if (w.key === t.key) {
+        st.locked = true; b.classList.add("correct"); if (!st.missed) st.stars++; st.round++;
+        $("gmMsg").textContent = "Yes! That is " + t.text + ". Now say it: " + t.text + ".";
+        speak(t.text, 0.9); setScore("Round " + Math.min(st.round, st.total) + " of " + st.total + "   Stars: " + st.stars);
+        gAfter(nextMatch, 2800);
+      } else {
+        st.missed = true; b.classList.add("wrong"); b.disabled = true;
+        $("gmMsg").textContent = "Not that one. Listen and try another."; speak(t.text, 0.9);
+      }
+    });
+    board.appendChild(b);
+  });
+  gAfter(function () { speak(t.text, 0.9); }, 300);
+}
+
+function startsWithSound(w, s) {
+  var t = w.text.toLowerCase();
+  if (s === "ST") return t.indexOf("st") === 0 && t.indexOf("str") !== 0;
+  if (s === "SH") return t.indexOf("sh") === 0;
+  return t.indexOf("r") === 0;
+}
+function hasSound(w, s) { return w.text.toLowerCase().indexOf(s.toLowerCase()) > -1; }
+function nextHunt() {
+  var st = G.cur; if (!st) return;
+  if (st.round >= st.total) return finishGame();
+  st.used = st.used || {};
+  var sound = G.sound === "All" ? ["SH", "ST", "R"][Math.floor(Math.random() * 3)] : G.sound;
+  var good = gAll().filter(function (w) { return startsWithSound(w, sound) && !st.used[w.key]; });
+  if (!good.length) good = gAll().filter(function (w) { return startsWithSound(w, sound); });
+  var c = good[Math.floor(Math.random() * good.length)]; st.used[c.key] = 1; st.missed = false; st.locked = false;
+  var opts = shuffle([c].concat(shuffle(gAll().filter(function (w) { return !hasSound(w, sound); })).slice(0, 3)));
+  $("gmPrompt").textContent = "Find the picture that starts with " + sound + "."; $("gmHear").hidden = true; $("gmMsg").textContent = TIPS[sound];
+  roundScore(st);
+  var board = $("gmBoard"); board.innerHTML = ""; board.className = "gboard two";
+  opts.forEach(function (w, i) {
+    var b = gTile(w.pic, "Picture " + (i + 1));
+    b.addEventListener("click", function () {
+      if (st.locked) return;
+      if (w.key === c.key) {
+        st.locked = true; b.classList.add("correct"); if (!st.missed) st.stars++; st.round++;
+        $("gmMsg").textContent = "Yes! " + c.text + " starts with " + sound + ". Now say it: " + c.text + ".";
+        speak(c.text, 0.9); setScore("Round " + Math.min(st.round, st.total) + " of " + st.total + "   Stars: " + st.stars);
+        gAfter(nextHunt, 3000);
+      } else {
+        st.missed = true; b.classList.add("wrong"); b.disabled = true;
+        $("gmMsg").textContent = "That is " + w.text + ". Try another one."; speak(w.text, 0.9);
+      }
+    });
+    board.appendChild(b);
+  });
+}
+
+function startMemory() {
+  var st = G.cur; st.turns = 0; st.matched = 0; st.first = null; st.locked = false;
+  var picks = shuffle(gPool()).slice(0, 6); st.pairs = picks.length;
+  var cards = shuffle(picks.concat(picks));
+  $("gmPrompt").textContent = "Flip two cards to find a pair."; $("gmHear").hidden = true; $("gmMsg").textContent = "";
+  setScore("Turns: 0");
+  var board = $("gmBoard"); board.innerHTML = ""; board.className = "gboard three";
+  cards.forEach(function (w, i) {
+    var b = gTile("?", "Card " + (i + 1));
+    b.addEventListener("click", function () {
+      if (st.locked || b.classList.contains("up") || b.classList.contains("done")) return;
+      b.textContent = w.pic; b.classList.add("up");
+      if (!st.first) { st.first = { b: b, w: w }; return; }
+      var f = st.first; st.first = null; st.turns++; setScore("Turns: " + st.turns);
+      if (f.w.key === w.key) {
+        f.b.classList.add("done"); b.classList.add("done"); st.matched++;
+        $("gmMsg").textContent = "A match! Now say it: " + w.text + "."; speak(w.text, 0.9);
+        if (st.matched >= st.pairs) gAfter(finishGame, 3000);
+      } else {
+        st.locked = true;
+        gAfter(function () { f.b.textContent = "?"; b.textContent = "?"; f.b.classList.remove("up"); b.classList.remove("up"); st.locked = false; }, 1100);
+      }
+    });
+    board.appendChild(b);
+  });
+}
+
+function finishGame() {
+  var st = G.cur; if (!st) return;
+  gClear();
+  try { localStorage.setItem("fw-games", String((Number(localStorage.getItem("fw-games")) || 0) + 1)); } catch (e) {}
+  renderProgress();
+  var name = st.name;
+  $("gmPrompt").textContent = "All done"; $("gmHear").hidden = true; $("gmMsg").textContent = "";
+  var board = $("gmBoard"); board.className = "gfinish"; board.innerHTML = "";
+  var p = document.createElement("p");
+  p.textContent = name === "memory" ? "You found every pair in " + st.turns + " turns. Great job!" : "You got " + st.stars + " of " + st.total + " on the first try. Great job!";
+  var again = document.createElement("button"); again.type = "button"; again.className = "btn fill"; again.textContent = "Play again";
+  again.addEventListener("click", function () { startGame(name); });
+  board.appendChild(p); board.appendChild(again);
+}
+
+document.querySelectorAll(".gcard").forEach(function (b) { b.addEventListener("click", function () { startGame(b.getAttribute("data-g")); }); });
+$("gmBack").addEventListener("click", showGameMenu);
+$("gmHear").addEventListener("click", function () { if (G.cur && G.cur.target) speak(G.cur.target.text, 0.9); });
+
+var PONLY = ".meter, #chips, .stage, #grid, .progress, .addword, .backup, main > .note";
+document.querySelectorAll(PONLY).forEach(function (el) { el.classList.add("ponly"); });
+function setMode(m) {
+  var games = m === "games";
+  stopAll(); gClear();
+  document.querySelector("main").classList.toggle("gm", games);
+  $("games").hidden = !games;
+  $("modePractice").setAttribute("aria-pressed", String(!games));
+  $("modeGames").setAttribute("aria-pressed", String(games));
+  if (games) { renderGameSounds(); showGameMenu(); }
+}
+$("modePractice").addEventListener("click", function () { setMode("practice"); });
+$("modeGames").addEventListener("click", function () { setMode("games"); });
 
 document.querySelectorAll(".rate .btn").forEach(function (b) {
   b.addEventListener("click", function () {
