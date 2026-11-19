@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Frankie's Words">
+<meta name="theme-color" content="#1a9e55">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<title>Frankie's Words</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one big word card on top, a thumb friendly button row, a grid of all words below. */
+:root {
+  --bg: #e6f3f0;
+  --card: #ffffff;
+  --ink: #12353a;
+  --muted: #4d6e72;
+  --primary: #0f7b6c;
+  --primary-ink: #ffffff;
+  --sun: #ffc83d;
+  --line: #bcd8d3;
+  --live: #c93a3a;
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f2427; --card: #17363a; --ink: #e8f5f2; --muted: #9bbdb8;
+    --primary: #3fc5ae; --primary-ink: #08201c; --sun: #ffd25e; --line: #2c5459; --live: #ff6b6b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f2427; --card: #17363a; --ink: #e8f5f2; --muted: #9bbdb8;
+  --primary: #3fc5ae; --primary-ink: #08201c; --sun: #ffd25e; --line: #2c5459; --live: #ff6b6b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 18px; line-height: 1.4; }
+main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; letter-spacing: -0.01em; }
+.tag { color: var(--muted); font-size: 0.95rem; }
+.meter { display: flex; align-items: center; gap: 10px; }
+.meter-bar { flex: 1; height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.meter-fill { height: 100%; width: 0; background: var(--sun); border-radius: 6px; transition: width .3s; }
+.meter-text { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 5.5em; text-align: right; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-weight: 700; font-size: 0.9rem; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.voice-row { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.voice-row[hidden] { display: none; }
+.voice-row select { flex: 1; min-width: 0; font: inherit; font-weight: 400; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+.stage { background: var(--card); border: 2px solid var(--line); border-radius: 28px; padding: 24px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.cat { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.word { font-family: var(--display); font-weight: 800; font-size: clamp(3rem, 16vw, 5.5rem); line-height: 1; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.06em; text-align: center; }
+.syl { padding: 0 0.08em; border-radius: 14px; transition: background .15s, transform .15s; }
+.syl.on { background: var(--sun); color: #12353a; transform: translateY(-4px); }
+.hint { color: var(--muted); font-size: 0.95rem; text-align: center; min-height: 1.4em; margin: 0; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.tip { margin: 0; width: 100%; padding: 12px 14px; border-left: 6px solid var(--sun); background: var(--bg); border-radius: 10px; font-size: 1rem; }
+.tip:empty { display: none; }
+.btn { font: inherit; font-weight: 700; font-size: 1.2rem; min-height: 72px; padding: 10px 14px; border-radius: 18px; border: 2px solid var(--primary); background: var(--card); color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
+.btn.fill { background: var(--primary); color: var(--primary-ink); }
+.btn.wide { grid-column: 1 / -1; }
+.btn[hidden] { display: none; }
+.btn:disabled { opacity: .5; }
+.btn.live { background: var(--live); border-color: var(--live); color: #ffffff; }
+.btn.star[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); color: #12353a; }
+.btn:active { transform: scale(0.98); }
+.btn:focus-visible, .chip:focus-visible, .tile:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.nav { display: flex; justify-content: space-between; width: 100%; }
+.nav .btn { min-height: 44px; font-size: 0.95rem; border-color: var(--line); color: var(--ink); padding: 8px 18px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.tile { font: inherit; font-family: var(--display); font-weight: 600; font-size: 1.15rem; padding: 12px 10px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; position: relative; text-align: center; }
+.tile[aria-current="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+.tile .st { position: absolute; top: 4px; right: 8px; font-size: 0.8rem; color: var(--sun); }
+.note { color: var(--muted); font-size: 0.9rem; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Frankie's Words</h1>
+    <span class="tag">Say it. Hear it. Star it.</span>
+  </header>
+
+  <div class="meter" aria-live="polite">
+    <div class="meter-bar"><div class="meter-fill" id="fill"></div></div>
+    <span class="meter-text" id="meterText">0 of 0</span>
+  </div>
+
+  <div class="chips" id="chips" role="group" aria-label="Word groups"></div>
+
+  <label class="voice-row" id="voiceRow" hidden>Voice
+    <select id="voice"></select>
+  </label>
+
+  <section class="stage" aria-label="Practice word">
+    <span class="cat" id="cat"></span>
+    <h2 class="word" id="word" aria-live="polite"></h2>
+    <p class="hint" id="hint">Tap Hear it, then try saying it yourself.</p>
+    <p class="tip" id="tip"></p>
+    <div class="actions">
+      <button class="btn fill" id="hear" type="button">Hear it</button>
+      <button class="btn" id="slow" type="button">Hear it slowly</button>
+      <button class="btn" id="recBtn" type="button">Record me</button>
+      <button class="btn" id="play" type="button" hidden>Play my voice</button>
+      <button class="btn wide" id="rep" type="button">Said it: 0 of 3</button>
+      <button class="btn star wide" id="star" type="button" aria-pressed="false">Mark as got it</button>
+    </div>
+    <div class="nav">
+      <button class="btn" id="prev" type="button">Back</button>
+      <button class="btn" id="next" type="button">Next word</button>
+    </div>
+  </section>
+
+  <div class="grid" id="grid"></div>
+  <p class="note">Words are spoken by your device voice. Recordings stay on this screen and are not saved or sent anywhere.</p>
+</main>
+
+<script>
+var WORDS = [
+  ["SH","shoe","shoe"],["SH","ship","ship"],["SH","sheep","sheep"],["SH","shell","shell"],
+  ["SH","shark","shark"],["SH","shirt","shirt"],["SH","shower","show·er"],["SH","shovel","shov·el"],
+  ["SH","fish","fish"],["SH","wish","wish"],["SH","dish","dish"],["SH","brush","brush"],
+  ["ST","star","star"],["ST","stop","stop"],["ST","stick","stick"],["ST","stone","stone"],
+  ["ST","stairs","stairs"],["ST","stove","stove"],["ST","story","sto·ry"],["ST","stamp","stamp"],
+  ["ST","station","sta·tion"],["ST","monster","mon·ster"],["ST","toast","toast"],["ST","nest","nest"],
+  ["R","red","red"],["R","run","run"],["R","rain","rain"],["R","ring","ring"],
+  ["R","rabbit","rab·bit"],["R","rainbow","rain·bow"],["R","rocket","rock·et"],["R","robot","ro·bot"],
+  ["R","river","riv·er"],["R","carrot","car·rot"],["R","parrot","par·rot"],["R","strawberry","straw·ber·ry"]
+].map(function (w, i) { return { id: i, cat: w[0], text: w[1], syl: w[2].split("·") }; });
+
+var GROUPS = ["All", "SH", "ST", "R", "Starred"];
+var TIPS = {
+  SH: "Round your lips a little and pull your tongue back. Push out a long, quiet shhh before the rest of the word.",
+  ST: "Tongue tip up behind your top teeth. Make a hissing sss, then tap the tongue down for t. Sss, then t.",
+  R: "Pull your tongue back and keep its sides up, lips slightly round. Start with a long rrr, like a friendly growl."
+};
+var state = { group: "All", idx: 0, stars: {}, recs: {}, reps: {} };
+try { state.stars = JSON.parse(localStorage.getItem("simba-stars") || "{}") || {}; } catch (e) { state.stars = {}; }
+function saveStars() { try { localStorage.setItem("simba-stars", JSON.stringify(state.stars)); } catch (e) {} }
+
+var $ = function (id) { return document.getElementById(id); };
+var timers = [];
+var mediaRec = null;
+
+function list() {
+  if (state.group === "All") return WORDS;
+  if (state.group === "Starred") return WORDS.filter(function (w) { return state.stars[w.id]; });
+  return WORDS.filter(function (w) { return w.cat === state.group; });
+}
+function current() { var l = list(); return l.length ? l[Math.min(state.idx, l.length - 1)] : null; }
+
+function stopRecording() { try { if (mediaRec && mediaRec.state === "recording") mediaRec.stop(); } catch (e) {} }
+
+function stopAll() {
+  timers.forEach(clearTimeout); timers = [];
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  stopRecording();
+  document.querySelectorAll(".syl.on").forEach(function (s) { s.classList.remove("on"); });
+}
+
+var FEMALE = /samantha|karen|moira|tessa|fiona|victoria|allison|ava|susan|nicky|serena|kate|joelle|noelle|zira|aria|jenny|hazel|libby|sonia|female|google uk english female|google us english/i;
+var MALE = /\bmale\b|daniel|alex|fred|david|mark|george|james|guy|ryan|thomas/i;
+function pickVoice() {
+  try {
+    var vs = window.speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); });
+    var chosen = null; try { chosen = localStorage.getItem("simba-voice"); } catch (x) {}
+    if (chosen) { var m = vs.filter(function (v) { return v.name === chosen; }); if (m.length) return m[0]; }
+    var NOVELTY = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|princess|deranged|hysterical|rocko|eddy|reed|grandpa|grandma/i;
+    vs = vs.filter(function (v) { return !NOVELTY.test(v.name); });
+    var sc = function (v) { var s = 0; if (/premium/i.test(v.name)) s += 3; if (/enhanced/i.test(v.name)) s += 2; if (/natural|neural|online/i.test(v.name)) s += 2; return s; };
+    var PREF = ["Samantha", "Ava", "Allison", "Nicky", "Noelle", "Karen", "Moira", "Tessa", "Serena", "Kate", "Susan", "Victoria"];
+    for (var pi = 0; pi < PREF.length; pi++) {
+      var hit = vs.filter(function (v) { return v.name.indexOf(PREF[pi]) === 0; });
+      if (hit.length) { hit.sort(function (a, b) { return sc(b) - sc(a); }); return hit[0]; }
+    }
+    var f = vs.filter(function (v) { return FEMALE.test(v.name) && !(/\bmale\b/i.test(v.name) && !/female/i.test(v.name)); });
+    var score = function (v) { var n = v.name, s = 0; if (/natural|neural|online/i.test(n)) s += 5; if (/premium|enhanced|siri/i.test(n)) s += 4; if (/google/i.test(n)) s += 2; if (v.localService === false) s += 1; return s; };
+    f.sort(function (a, b) { return score(b) - score(a); });
+    if (f.length) return f[0];
+    var nm = vs.filter(function (v) { return !MALE.test(v.name); });
+    return nm[0] || vs[0] || null;
+  } catch (e) { return null; }
+}
+try { window.speechSynthesis.onvoiceschanged = function () {}; window.speechSynthesis.getVoices(); } catch (e) {}
+function speak(text, rate) {
+  try {
+    if (!window.speechSynthesis) return false;
+    var u = new SpeechSynthesisUtterance(text);
+    var v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = "en-US"; }
+    u.rate = rate; u.pitch = 1.1;
+    window.speechSynthesis.speak(u);
+    return true;
+  } catch (e) { return false; }
+}
+
+function renderChips() {
+  var box = $("chips"); box.innerHTML = "";
+  GROUPS.forEach(function (g) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = g;
+    b.setAttribute("aria-pressed", String(g === state.group));
+    b.addEventListener("click", function () { stopAll(); state.group = g; state.idx = 0; render(); });
+    box.appendChild(b);
+  });
+}
+
+function renderStage() {
+  var w = current();
+  var wordEl = $("word"); wordEl.innerHTML = "";
+  if (!w) {
+    $("cat").textContent = "";
+    wordEl.textContent = "No stars yet";
+    wordEl.style.fontSize = "2rem";
+    $("hint").textContent = "Mark words as got it and they show up here.";
+    $("tip").textContent = "";
+    ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = true; });
+    $("play").hidden = true;
+    return;
+  }
+  wordEl.style.fontSize = "";
+  ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = false; });
+  $("cat").textContent = w.cat + " sound";
+  $("tip").textContent = TIPS[w.cat] || "";
+  updateRep();
+  w.syl.forEach(function (s) {
+    var span = document.createElement("span"); span.className = "syl"; span.textContent = s; wordEl.appendChild(span);
+  });
+  $("hint").textContent = w.syl.length > 1 ? w.syl.length + " parts. Tap Hear it slowly to see each part light up." : "One short sound. Take a breath, then say it.";
+  $("play").hidden = !state.recs[w.id];
+  var on = !!state.stars[w.id];
+  $("star").setAttribute("aria-pressed", String(on));
+  $("star").textContent = on ? "Got it. Nice work" : "Mark as got it";
+}
+
+function updateRep() {
+  var w = current(); if (!w) return;
+  var n = state.reps[w.id] || 0;
+  $("rep").textContent = n >= 3 ? "Three times. Great work" : "Said it: " + n + " of 3";
+}
+
+function renderGrid() {
+  var g = $("grid"); g.innerHTML = "";
+  var cur = current();
+  list().forEach(function (w, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.textContent = w.text;
+    if (cur && cur.id === w.id) b.setAttribute("aria-current", "true");
+    if (state.stars[w.id]) { var s = document.createElement("span"); s.className = "st"; s.textContent = "★"; b.appendChild(s); }
+    b.addEventListener("click", function () { stopAll(); state.idx = i; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
+    g.appendChild(b);
+  });
+}
+
+function renderMeter() {
+  var n = WORDS.filter(function (w) { return state.stars[w.id]; }).length;
+  $("fill").style.width = (n / WORDS.length * 100) + "%";
+  $("meterText").textContent = n + " of " + WORDS.length;
+}
+
+function render() { renderChips(); renderStage(); renderGrid(); renderMeter(); }
+
+$("hear").addEventListener("click", function () {
+  var w = current(); if (!w) return; stopAll();
+  if (!speak(w.text, 0.9)) $("hint").textContent = "This device cannot speak words aloud here. Try opening it in Safari.";
+});
+$("slow").addEventListener("click", function () {
+  var w = current(); if (!w) return; stopAll();
+  var ok = speak(w.text, 0.45);
+  if (!ok) { $("hint").textContent = "This device cannot speak words aloud here. Try opening it in Safari."; }
+  var spans = document.querySelectorAll(".syl");
+  spans.forEach(function (s, i) {
+    timers.push(setTimeout(function () {
+      spans.forEach(function (x) { x.classList.remove("on"); });
+      s.classList.add("on");
+    }, i * 650));
+  });
+  timers.push(setTimeout(function () { spans.forEach(function (x) { x.classList.remove("on"); }); }, spans.length * 650 + 300));
+});
+
+$("recBtn").addEventListener("click", function () {
+  var w = current(); if (!w) return;
+  if (mediaRec && mediaRec.state === "recording") { stopRecording(); return; }
+  stopAll();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+    $("hint").textContent = "Recording does not work in this browser. Open this page in Safari.";
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+    var chunks = [], type = "";
+    ["audio/mp4", "audio/webm;codecs=opus", "audio/webm"].some(function (t) {
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) { type = t; return true; }
+      return false;
+    });
+    var rec = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream);
+    mediaRec = rec;
+    var wordId = w.id;
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = function () {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      var blob = new Blob(chunks, { type: rec.mimeType || type || "audio/mp4" });
+      if (state.recs[wordId]) { try { URL.revokeObjectURL(state.recs[wordId]); } catch (x) {} }
+      state.recs[wordId] = URL.createObjectURL(blob);
+      $("recBtn").textContent = "Record me"; $("recBtn").classList.remove("live");
+      var cw = current();
+      if (cw && cw.id === wordId) {
+        $("play").hidden = false;
+        $("hint").textContent = "Saved. Tap Play my voice and compare it with Hear it.";
+      }
+    };
+    rec.start();
+    $("recBtn").textContent = "Stop"; $("recBtn").classList.add("live");
+    $("hint").textContent = "Recording. Say the word, then tap Stop.";
+  }).catch(function () {
+    $("hint").textContent = "The microphone is blocked. Allow it for this site in Settings, then Safari, then Microphone, and try again.";
+  });
+});
+$("play").addEventListener("click", function () {
+  var w = current(); if (!w || !state.recs[w.id]) return; stopAll();
+  var a = new Audio(state.recs[w.id]);
+  a.play().catch(function () { $("hint").textContent = "Could not play the recording. Try recording again."; });
+});
+$("star").addEventListener("click", function () {
+  var w = current(); if (!w) return;
+  if (state.stars[w.id]) delete state.stars[w.id]; else state.stars[w.id] = 1;
+  saveStars();
+  if (state.group === "Starred") { render(); } else { renderStage(); renderGrid(); renderMeter(); }
+});
+$("rep").addEventListener("click", function () {
+  var w = current(); if (!w) return;
+  var n = state.reps[w.id] || 0;
+  state.reps[w.id] = n >= 3 ? 1 : n + 1;
+  updateRep();
+});
+$("next").addEventListener("click", function () { stopAll(); var l = list(); state.idx = (state.idx + 1) % l.length; render(); });
+$("prev").addEventListener("click", function () { stopAll(); var l = list(); state.idx = (state.idx - 1 + l.length) % l.length; render(); });
+
+function fillVoices() {
+  try {
+    var sel = $("voice");
+    var vs = window.speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); });
+    if (!vs.length) { $("voiceRow").hidden = true; return; }
+    var saved = null; try { saved = localStorage.getItem("simba-voice"); } catch (x) {}
+    sel.innerHTML = "";
+    var auto = document.createElement("option"); auto.value = ""; auto.textContent = "Automatic"; sel.appendChild(auto);
+    vs.forEach(function (v) {
+      var o = document.createElement("option"); o.value = v.name; o.textContent = v.name + " (" + v.lang + ")";
+      if (v.name === saved) o.selected = true;
+      sel.appendChild(o);
+    });
+    $("voiceRow").hidden = false;
+  } catch (e) { $("voiceRow").hidden = true; }
+}
+$("voice").addEventListener("change", function (e) {
+  try { if (e.target.value) localStorage.setItem("simba-voice", e.target.value); else localStorage.removeItem("simba-voice"); } catch (x) {}
+  stopAll(); speak("Hello Frankie", 0.9);
+});
+try { window.speechSynthesis.onvoiceschanged = fillVoices; } catch (e) {}
+fillVoices();
+render();
+</script>
+</body>
+</html>
