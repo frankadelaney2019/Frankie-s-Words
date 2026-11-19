@@ -543,6 +543,12 @@ $("rep").addEventListener("click", function () {
   var n = state.reps[w.id] || 0;
   state.reps[w.id] = n >= 3 ? 1 : n + 1;
   updateRep();
+  if (state.reps[w.id] >= 3 && !state.stars[w.key]) {
+    state.stars[w.key] = 1; saveStars();
+    if (state.group === "Starred") { render(); } else { renderStage(); renderGrid(); renderMeter(); }
+    updateRep();
+    $("fb").textContent = "Three times. Marked as got it. Great work!";
+  }
 });
 $("next").addEventListener("click", function () { stopAll(); var l = list(); state.idx = (state.idx + 1) % l.length; render(); });
 $("prev").addEventListener("click", function () { stopAll(); var l = list(); state.idx = (state.idx - 1 + l.length) % l.length; render(); });
