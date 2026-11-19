@@ -85,6 +85,12 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
 .tile { font: inherit; font-family: var(--display); font-weight: 600; font-size: 1.15rem; padding: 12px 10px; border-radius: 16px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; position: relative; text-align: center; }
 .tile[aria-current="true"] { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
 .tile .st { position: absolute; top: 4px; right: 8px; font-size: 0.8rem; color: var(--sun); }
+.pic { font-size: 5.5rem; line-height: 1; }
+.word.phrase { font-size: clamp(2rem, 10vw, 3.4rem); gap: 0.28em; line-height: 1.15; }
+.backup { display: flex; flex-direction: column; gap: 10px; border-top: 2px solid var(--line); padding-top: 18px; }
+.backup h3 { font-family: var(--display); font-size: 1.3rem; margin: 0; }
+.backup textarea { width: 100%; font: inherit; font-size: 0.9rem; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); }
+.backup textarea[hidden] { display: none; }
 .note { color: var(--muted); font-size: 0.9rem; margin: 0; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -109,6 +115,7 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
 
   <section class="stage" aria-label="Practice word">
     <span class="cat" id="cat"></span>
+    <div class="pic" id="pic" aria-hidden="true"></div>
     <h2 class="word" id="word" aria-live="polite"></h2>
     <p class="hint" id="hint">Tap Hear it, then try saying it yourself.</p>
     <p class="tip" id="tip"></p>
@@ -127,31 +134,49 @@ h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; 
   </section>
 
   <div class="grid" id="grid"></div>
+  <section class="backup" aria-label="Back up your stars">
+    <h3>Back up your stars</h3>
+    <p class="note">Your stars are saved on this phone. To keep them safe, copy the backup code and save it in Notes, or text it to yourself. Paste it back here to restore.</p>
+    <div class="actions">
+      <button class="btn" id="bkShow" type="button">Show backup code</button>
+      <button class="btn" id="bkRestore" type="button">Restore from code</button>
+    </div>
+    <textarea id="bkText" rows="3" hidden aria-label="Backup code"></textarea>
+    <button class="btn wide" id="bkApply" type="button" hidden>Restore now</button>
+    <p class="hint" id="bkMsg"></p>
+  </section>
+
   <p class="note">Words are spoken by your device voice. Recordings stay on this screen and are not saved or sent anywhere.</p>
 </main>
 
 <script>
 var WORDS = [
-  ["SH","shoe","shoe"],["SH","ship","ship"],["SH","sheep","sheep"],["SH","shell","shell"],
-  ["SH","shark","shark"],["SH","shirt","shirt"],["SH","shower","show·er"],["SH","shovel","shov·el"],
-  ["SH","fish","fish"],["SH","wish","wish"],["SH","dish","dish"],["SH","brush","brush"],
-  ["ST","star","star"],["ST","stop","stop"],["ST","stick","stick"],["ST","stone","stone"],
-  ["ST","stairs","stairs"],["ST","stove","stove"],["ST","story","sto·ry"],["ST","stamp","stamp"],
-  ["ST","station","sta·tion"],["ST","monster","mon·ster"],["ST","toast","toast"],["ST","nest","nest"],
-  ["R","red","red"],["R","run","run"],["R","rain","rain"],["R","ring","ring"],
-  ["R","rabbit","rab·bit"],["R","rainbow","rain·bow"],["R","rocket","rock·et"],["R","robot","ro·bot"],
-  ["R","river","riv·er"],["R","carrot","car·rot"],["R","parrot","par·rot"],["R","strawberry","straw·ber·ry"]
-].map(function (w, i) { return { id: i, cat: w[0], text: w[1], syl: w[2].split("·") }; });
+  ["SH","shoe","shoe","👟"],["SH","ship","ship","🚢"],["SH","sheep","sheep","🐑"],["SH","shell","shell","🐚"],
+  ["SH","shark","shark","🦈"],["SH","shirt","shirt","👕"],["SH","shorts","shorts","🩳"],["SH","shower","show·er","🚿"],
+  ["SH","shampoo","sham·poo","🧴"],["SH","fish","fish","🐟"],["SH","dish","dish","🍽️"],["SH","brush","brush","🖌️"],
+  ["ST","star","star","⭐"],["ST","stop","stop","🛑"],["ST","stone","stone","🪨"],["ST","story","sto·ry","📖"],
+  ["ST","station","sta·tion","🚉"],["ST","monster","mon·ster","👹"],["ST","toast","toast","🍞"],["ST","nest","nest","🪹"],
+  ["ST","steak","steak","🥩"],["ST","storm","storm","⛈️"],["ST","stethoscope","steth·o·scope","🩺"],["ST","stadium","sta·di·um","🏟️"],
+  ["R","red","red","🔴"],["R","run","run","🏃"],["R","rain","rain","🌧️"],["R","ring","ring","💍"],
+  ["R","rabbit","rab·bit","🐰"],["R","rainbow","rain·bow","🌈"],["R","rocket","rock·et","🚀"],["R","robot","ro·bot","🤖"],
+  ["R","river","riv·er","🏞️"],["R","carrot","car·rot","🥕"],["R","parrot","par·rot","🦜"],["R","strawberry","straw·ber·ry","🍓"],
+  ["R","rose","rose","🌹"],["R","radio","ra·di·o","📻"],["R","ruler","ru·ler","📏"],["R","rice","rice","🍚"],
+  ["Phrase","Red rabbit","Red·rabbit","🐰"],["Phrase","Shiny shoes","Shi·ny·shoes","👟"],["Phrase","Fish in a dish","Fish·in·a·dish","🐟"],
+  ["Phrase","Stop sign","Stop·sign","🛑"],["Phrase","Star in the sky","Star·in·the·sky","⭐"],["Phrase","Rocket ride","Rock·et·ride","🚀"],
+  ["Phrase","Wash the sheep","Wash·the·sheep","🐑"],["Phrase","Funny monster","Fun·ny·mon·ster","👹"],["Phrase","Run to the river","Run·to·the·riv·er","🏞️"],
+  ["Phrase","Shell on the shore","Shell·on·the·shore","🐚"],["Phrase","Rain on the roof","Rain·on·the·roof","🌧️"],["Phrase","Strawberry toast","Straw·ber·ry·toast","🍓"]
+].map(function (w) { return { id: w[1], key: w[1], cat: w[0], text: w[1], syl: w[2].split("·"), pic: w[3] }; });
 
-var GROUPS = ["All", "SH", "ST", "R", "Starred"];
+var GROUPS = ["All", "SH", "ST", "R", "Phrase", "Starred"];
 var TIPS = {
   SH: "Round your lips a little and pull your tongue back. Push out a long, quiet shhh before the rest of the word.",
   ST: "Tongue tip up behind your top teeth. Make a hissing sss, then tap the tongue down for t. Sss, then t.",
-  R: "Pull your tongue back and keep its sides up, lips slightly round. Start with a long rrr, like a friendly growl."
+  R: "Pull your tongue back and keep its sides up, lips slightly round. Start with a long rrr, like a friendly growl.",
+  Phrase: "Say it slowly, one word at a time. Take an easy breath between words. Slow and clear is the goal."
 };
 var state = { group: "All", idx: 0, stars: {}, recs: {}, reps: {} };
-try { state.stars = JSON.parse(localStorage.getItem("simba-stars") || "{}") || {}; } catch (e) { state.stars = {}; }
-function saveStars() { try { localStorage.setItem("simba-stars", JSON.stringify(state.stars)); } catch (e) {} }
+try { state.stars = JSON.parse(localStorage.getItem("fw-stars") || "{}") || {}; } catch (e) { state.stars = {}; }
+function saveStars() { try { localStorage.setItem("fw-stars", JSON.stringify(state.stars)); } catch (e) {} }
 
 var $ = function (id) { return document.getElementById(id); };
 var timers = [];
@@ -159,7 +184,7 @@ var mediaRec = null;
 
 function list() {
   if (state.group === "All") return WORDS;
-  if (state.group === "Starred") return WORDS.filter(function (w) { return state.stars[w.id]; });
+  if (state.group === "Starred") return WORDS.filter(function (w) { return state.stars[w.key]; });
   return WORDS.filter(function (w) { return w.cat === state.group; });
 }
 function current() { var l = list(); return l.length ? l[Math.min(state.idx, l.length - 1)] : null; }
@@ -212,7 +237,7 @@ function renderChips() {
   var box = $("chips"); box.innerHTML = "";
   GROUPS.forEach(function (g) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = g;
+    b.type = "button"; b.className = "chip"; b.textContent = g === "Phrase" ? "Phrases" : g;
     b.setAttribute("aria-pressed", String(g === state.group));
     b.addEventListener("click", function () { stopAll(); state.group = g; state.idx = 0; render(); });
     box.appendChild(b);
@@ -224,6 +249,7 @@ function renderStage() {
   var wordEl = $("word"); wordEl.innerHTML = "";
   if (!w) {
     $("cat").textContent = "";
+    $("pic").textContent = "";
     wordEl.textContent = "No stars yet";
     wordEl.style.fontSize = "2rem";
     $("hint").textContent = "Mark words as got it and they show up here.";
@@ -234,15 +260,17 @@ function renderStage() {
   }
   wordEl.style.fontSize = "";
   ["hear","slow","recBtn","star","rep","prev","next"].forEach(function (id) { $(id).disabled = false; });
-  $("cat").textContent = w.cat + " sound";
+  $("cat").textContent = w.cat === "Phrase" ? "Phrase practice" : w.cat + " sound";
+  $("pic").textContent = w.pic || "";
+  wordEl.className = "word" + (w.cat === "Phrase" ? " phrase" : "");
   $("tip").textContent = TIPS[w.cat] || "";
   updateRep();
   w.syl.forEach(function (s) {
     var span = document.createElement("span"); span.className = "syl"; span.textContent = s; wordEl.appendChild(span);
   });
-  $("hint").textContent = w.syl.length > 1 ? w.syl.length + " parts. Tap Hear it slowly to see each part light up." : "One short sound. Take a breath, then say it.";
+  $("hint").textContent = w.syl.length > 1 ? w.syl.length + (w.cat === "Phrase" ? " words" : " parts") + ". Tap Hear it slowly to see each one light up." : "One short sound. Take a breath, then say it.";
   $("play").hidden = !state.recs[w.id];
-  var on = !!state.stars[w.id];
+  var on = !!state.stars[w.key];
   $("star").setAttribute("aria-pressed", String(on));
   $("star").textContent = on ? "Got it. Nice work" : "Mark as got it";
 }
@@ -258,16 +286,16 @@ function renderGrid() {
   var cur = current();
   list().forEach(function (w, i) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "tile"; b.textContent = w.text;
+    b.type = "button"; b.className = "tile"; b.textContent = (w.pic ? w.pic + " " : "") + w.text;
     if (cur && cur.id === w.id) b.setAttribute("aria-current", "true");
-    if (state.stars[w.id]) { var s = document.createElement("span"); s.className = "st"; s.textContent = "★"; b.appendChild(s); }
+    if (state.stars[w.key]) { var s = document.createElement("span"); s.className = "st"; s.textContent = "★"; b.appendChild(s); }
     b.addEventListener("click", function () { stopAll(); state.idx = i; render(); window.scrollTo({ top: 0, behavior: "smooth" }); });
     g.appendChild(b);
   });
 }
 
 function renderMeter() {
-  var n = WORDS.filter(function (w) { return state.stars[w.id]; }).length;
+  var n = WORDS.filter(function (w) { return state.stars[w.key]; }).length;
   $("fill").style.width = (n / WORDS.length * 100) + "%";
   $("meterText").textContent = n + " of " + WORDS.length;
 }
@@ -336,7 +364,7 @@ $("play").addEventListener("click", function () {
 });
 $("star").addEventListener("click", function () {
   var w = current(); if (!w) return;
-  if (state.stars[w.id]) delete state.stars[w.id]; else state.stars[w.id] = 1;
+  if (state.stars[w.key]) delete state.stars[w.key]; else state.stars[w.key] = 1;
   saveStars();
   if (state.group === "Starred") { render(); } else { renderStage(); renderGrid(); renderMeter(); }
 });
@@ -370,6 +398,35 @@ $("voice").addEventListener("change", function (e) {
   stopAll(); speak("Hello Frankie", 0.9);
 });
 try { window.speechSynthesis.onvoiceschanged = fillVoices; } catch (e) {}
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+
+function backupCode() {
+  return "FW1:" + btoa(unescape(encodeURIComponent(JSON.stringify(Object.keys(state.stars)))));
+}
+function parseBackup(t) {
+  t = (t || "").trim();
+  if (t.indexOf("FW1:") !== 0) return null;
+  try { var a = JSON.parse(decodeURIComponent(escape(atob(t.slice(4))))); return Array.isArray(a) ? a : null; } catch (e) { return null; }
+}
+$("bkShow").addEventListener("click", function () {
+  var ta = $("bkText"); ta.hidden = false; $("bkApply").hidden = true;
+  ta.value = backupCode(); ta.readOnly = true; ta.focus(); ta.select();
+  var done = function (ok) { $("bkMsg").textContent = ok ? "Copied. Paste it into Notes or a text to yourself." : "Press and hold the code, then tap Copy."; };
+  try { navigator.clipboard.writeText(ta.value).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+});
+$("bkRestore").addEventListener("click", function () {
+  var ta = $("bkText"); ta.hidden = false; ta.readOnly = false; ta.value = ""; ta.focus();
+  $("bkApply").hidden = false; $("bkMsg").textContent = "Paste your backup code, then tap Restore now.";
+});
+$("bkApply").addEventListener("click", function () {
+  var arr = parseBackup($("bkText").value);
+  if (!arr) { $("bkMsg").textContent = "That code did not work. Copy the whole code and try again."; return; }
+  var valid = {}; WORDS.forEach(function (w) { valid[w.key] = 1; });
+  arr.forEach(function (k) { if (valid[k]) state.stars[k] = 1; });
+  saveStars(); render();
+  $("bkText").hidden = true; $("bkApply").hidden = true; $("bkMsg").textContent = "Restored. Your stars are back.";
+});
+
 fillVoices();
 render();
 </script>
